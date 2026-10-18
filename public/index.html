@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dad's Bed Measurement Visit | Book a Home Slot with GPS Location</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .location-btn-box {
+      background: #eff6ff;
+      border: 2px dashed #93c5fd;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      margin-bottom: 1.25rem;
+      transition: all 0.2s ease;
+    }
+    .location-btn-box.detected {
+      background: #ecfdf5;
+      border: 2px solid #34d399;
+    }
+    .btn-gps {
+      background: #2563eb;
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+      transition: all 0.2s ease;
+    }
+    .btn-gps:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+    .gps-result-box {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.85rem;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    .gps-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #10b981;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="logo">
+        <div class="logo-icon" style="background: #eff6ff; color: #2563eb;">
+          <i class="fa-solid fa-location-dot"></i>
+        </div>
+        <div class="logo-text">
+          <h1 id="brand-name">Dad's Bed Measurement & Visit Service</h1>
+          <p>Book a Visit • Share Live GPS Location for Easy Navigation</p>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <button class="btn btn-outline btn-sm" onclick="openTrackModal()">
+          <i class="fa-solid fa-magnifying-glass"></i> Track Booking
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%);">
+    <div class="hero-content">
+      <div class="badge-tag">
+        <i class="fa-solid fa-location-crosshairs"></i> 1-Click Current Location Sharing
+      </div>
+      <h2>Book a Slot for Dad to Visit Your Home & Check Your Bed</h2>
+      <p>
+        Dad will personally visit your home to check and measure your bed accurately. 
+        Just tap <strong>"Use My Current Location"</strong> so Dad can navigate right to your door with Google Maps GPS!
+      </p>
+      <div class="hero-stats">
+        <div class="stat-pill"><i class="fa-solid fa-map-pin"></i> Direct GPS Navigation for Dad</div>
+        <div class="stat-pill"><i class="fa-solid fa-shield-check"></i> ₹<span class="booking-fee-text">99</span> Deposit (Prevents Fake Bookings)</div>
+        <div class="stat-pill"><i class="fa-solid fa-ruler-combined"></i> In-Person Bed Inspection</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- Booking Card -->
+    <div class="booking-card" style="max-width: 760px; margin: 0 auto;">
+      <div class="booking-header">
+        <div>
+          <h3>Book Dad's Visit Slot</h3>
+          <p style="color: var(--text-muted); font-size: 0.875rem;">Share your location so Dad can easily find your house without calling for directions.</p>
+        </div>
+        <div class="fee-alert">
+          <i class="fa-solid fa-shield-alt"></i> Advance Fee: ₹<span class="booking-fee-text">99</span> <small>(No fake bookings)</small>
+        </div>
+      </div>
+
+      <form id="bookingForm" class="booking-form" onsubmit="handleBookingSubmit(event)">
+
+        <!-- Step 1: Current Location (Main Feature) -->
+        <div class="form-section-title">
+          <i class="fa-solid fa-location-dot" style="color: #ef4444;"></i> Step 1: Share Your Current Location (So Dad Can Reach You Easily)
+        </div>
+
+        <div class="location-btn-box" id="locationBox">
+          <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.6rem; color: #1e3a8a;">
+            Tap the button below to auto-detect your home location:
+          </p>
+          <button type="button" class="btn-gps" id="btnDetectGps" onclick="detectCurrentLocation()">
+            <i class="fa-solid fa-location-crosshairs"></i> Use My Current Location
+          </button>
+          
+          <div class="gps-result-box" id="gpsResultBox">
+            <span class="gps-badge"><i class="fa-solid fa-check"></i> GPS Location Captured!</span>
+            <div id="gpsDetails" style="color: #334155; margin-top: 0.25rem; font-weight: 600;"></div>
+            <div id="gpsAddressText" style="color: #64748b; font-size: 0.8rem; margin-top: 0.2rem;"></div>
+            <a id="previewMapLink" href="#" target="_blank" style="display: inline-block; margin-top: 0.4rem; color: #2563eb; font-weight: 600; text-decoration: underline; font-size: 0.8rem;">
+              <i class="fa-solid fa-map-location-dot"></i> Test Google Maps Pin
+            </a>
+          </div>
+
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+            * Allows Dad's smartphone to launch Google Maps and drive directly to you.
+          </p>
+        </div>
+
+        <!-- Hidden coordinates -->
+        <input type="hidden" id="geoLat" value="">
+        <input type="hidden" id="geoLng" value="">
+        <input type="hidden" id="geoMapsUrl" value="">
+
+        <!-- Extra Address Details -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="addressLine">Flat / House No. & Building Name <span class="required">*</span></label>
+            <input type="text" id="addressLine" class="form-control" placeholder="e.g. Flat 301, Tower B, Green Apartments" required>
+          </div>
+          <div class="form-group">
+            <label for="landmark">Landmark / Gate Info (Optional)</label>
+            <input type="text" id="landmark" class="form-control" placeholder="e.g. Near Big Banyan Tree / Gate #2">
+          </div>
+        </div>
+
+        <!-- Step 2: Date & Slot Selection -->
+        <div class="form-section-title" style="margin-top: 1.5rem;">
+          <i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Step 2: Select Date & Time Slot For Dad's Visit
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="bookingDate">Visit Date <span class="required">*</span></label>
+            <input type="date" id="bookingDate" class="form-control" required onchange="loadAvailableSlots()">
+          </div>
+          <div class="form-group">
+            <label for="numberOfBeds">How Many Beds to Check?</label>
+            <select id="numberOfBeds" class="form-control">
+              <option value="1">1 Bed</option>
+              <option value="2">2 Beds</option>
+              <option value="3">3 Beds</option>
+              <option value="4">4+ Beds</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label>Select an Available Slot <span class="required">*</span></label>
+          <div class="slots-container" id="slotsContainer">
+            <div style="color: var(--text-muted); font-size: 0.9rem; padding: 0.5rem 0;">
+              Loading Dad's schedule...
+            </div>
+          </div>
+          <input type="hidden" id="selectedTimeSlot" required>
+        </div>
+
+        <!-- Step 3: Contact Info -->
+        <div class="form-section-title">
+          <i class="fa-solid fa-user-check" style="color: var(--success);"></i> Step 3: Your Contact Details
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="customerName">Your Full Name <span class="required">*</span></label>
+            <input type="text" id="customerName" class="form-control" placeholder="e.g. Rahul Sharma" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Mobile Number (For WhatsApp / Call) <span class="required">*</span></label>
+            <input type="tel" id="phone" class="form-control" placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="specialInstructions">Special Note for Dad (Optional)</label>
+          <input type="text" id="specialInstructions" class="form-control" placeholder="e.g. Ring bell twice, dog is friendly, call 10 mins before arrival">
+        </div>
+
+        <!-- Anti-fake explanation -->
+        <div class="security-banner">
+          <i class="fa-solid fa-shield-halved" style="color: #059669; font-size: 1.35rem;"></i>
+          <div>
+            <strong>Genuine Bookings Only: ₹<span class="booking-fee-text">99</span> Advance Deposit</strong>
+            <p style="margin-top: 0.15rem; font-size: 0.8rem; color: var(--text-muted);">
+              This deposit confirms your slot so Dad doesn't travel to fake pins or prank calls. 
+              <strong>The ₹<span class="booking-fee-text">99</span> is 100% deducted from your final bedsheet order!</strong>
+            </p>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.95rem; font-size: 1.15rem; background: #2563eb;">
+          <i class="fa-solid fa-credit-card"></i> Confirm Visit Slot & Pay ₹<span class="booking-fee-text">99</span>
+        </button>
+
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Payment Gateway Modal -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3><i class="fa-solid fa-shield-halved" style="color: var(--success);"></i> Secure Visit Booking Payment</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Booking ID: <span id="payBookingId" style="font-weight: 700; color: #2563eb;"></span></p>
+        </div>
+        <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="background: var(--info-bg); border: 1px solid #bae6fd; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.875rem; font-weight: 600; color: #0369a1;">Advance Bed Visit Fee:</span>
+            <span style="font-size: 1.25rem; font-weight: 800; color: #0284c7;">₹<span id="payAmount">99</span></span>
+          </div>
+          <p style="font-size: 0.75rem; color: #0284c7; margin-top: 0.25rem;">
+            ✓ Real-time slot locking • Prevents fake bookings • Credited towards bedsheet order
+          </p>
+        </div>
+
+        <div class="payment-tabs">
+          <button class="tab-btn active" onclick="switchPayTab('upi')"><i class="fa-brands fa-google-pay"></i> UPI / QR Code</button>
+          <button class="tab-btn" onclick="switchPayTab('card')"><i class="fa-solid fa-credit-card"></i> Card / NetBanking</button>
+        </div>
+
+        <!-- Tab 1: UPI / QR Code -->
+        <div id="tab-upi">
+          <div class="qr-box">
+            <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
+            <div class="qr-image" id="qrContainer">
+              <svg viewBox="0 0 100 100" width="160" height="160">
+                <rect width="100" height="100" fill="white"/>
+                <rect x="10" y="10" width="25" height="25" fill="#1e293b"/>
+                <rect x="15" y="15" width="15" height="15" fill="white"/>
+                <rect x="18" y="18" width="9" height="9" fill="#1e293b"/>
+                <rect x="65" y="10" width="25" height="25" fill="#1e293b"/>
+                <rect x="70" y="15" width="15" height="15" fill="white"/>
+                <rect x="73" y="18" width="9" height="9" fill="#1e293b"/>
+                <rect x="10" y="65" width="25" height="25" fill="#1e293b"/>
+                <rect x="15" y="70" width="15" height="15" fill="white"/>
+                <rect x="18" y="73" width="9" height="9" fill="#1e293b"/>
+                <rect x="42" y="15" width="6" height="6" fill="#2563eb"/>
+                <rect x="52" y="15" width="6" height="6" fill="#1e293b"/>
+                <rect x="42" y="25" width="16" height="6" fill="#1e293b"/>
+                <rect x="42" y="38" width="8" height="8" fill="#1e293b"/>
+                <rect x="15" y="42" width="6" height="15" fill="#1e293b"/>
+                <rect x="25" y="48" width="12" height="6" fill="#2563eb"/>
+                <rect x="65" y="45" width="25" height="6" fill="#1e293b"/>
+                <rect x="75" y="55" width="12" height="12" fill="#1e293b"/>
+                <rect x="45" y="65" width="8" height="8" fill="#2563eb"/>
+                <rect x="58" y="75" width="12" height="6" fill="#1e293b"/>
+                <rect x="45" y="80" width="16" height="10" fill="#1e293b"/>
+              </svg>
+            </div>
+            <div>
+              <div class="upi-id-pill">
+                <i class="fa-solid fa-at"></i> <span id="displayUpiId">bedsheetfitting@upi</span>
+              </div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              Click below to verify payment and lock Dad's visit slot.
+            </p>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <button class="btn btn-success" style="width: 100%; padding: 0.75rem;" onclick="processPayment('UPI')">
+              <i class="fa-solid fa-circle-check"></i> I have Paid via UPI / Confirm Slot
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 2: Card -->
+        <div id="tab-card" style="display: none;">
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label>Card Number</label>
+            <input type="text" class="form-control" placeholder="4111 •••• •••• 1234" value="4111 2233 4455 9876">
+          </div>
+          <div class="form-grid" style="margin-bottom: 0.75rem;">
+            <div class="form-group">
+              <label>Expiry</label>
+              <input type="text" class="form-control" placeholder="MM/YY" value="12/28">
+            </div>
+            <div class="form-group">
+              <label>CVV</label>
+              <input type="password" class="form-control" placeholder="123" value="789">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Name on Card</label>
+            <input type="text" class="form-control" id="cardHolderName" placeholder="Name">
+          </div>
+          <button class="btn btn-success" style="width: 100%; padding: 0.75rem;" onclick="processPayment('CARD')">
+            <i class="fa-solid fa-lock"></i> Pay ₹<span class="booking-fee-text">99</span> Securely & Confirm
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Confirmation Modal -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-content" style="max-width: 480px; text-align: center;">
+      <div class="modal-body" style="padding: 2.25rem 1.5rem;">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: #ecfdf5; color: #10b981; font-size: 2.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: #065f46; margin-bottom: 0.35rem;">
+          Visit Slot Confirmed!
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+          Dad has received your booking and location pin!
+        </p>
+
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: left; margin-bottom: 1.5rem; font-size: 0.875rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span style="color: var(--text-muted);">Booking ID:</span>
+            <strong id="confBookingId" style="color: #2563eb;"></strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span style="color: var(--text-muted);">Customer:</span>
+            <strong id="confCustomerName"></strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span style="color: var(--text-muted);">Visit Date & Slot:</span>
+            <strong id="confDateTime"></strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span style="color: var(--text-muted);">GPS Location Pin:</span>
+            <strong style="color: #059669;"><i class="fa-solid fa-location-dot"></i> Saved for Dad's GPS</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span style="color: var(--text-muted);">Advance Paid:</span>
+            <strong style="color: #059669;">₹<span id="confAmount">99</span> (Verified)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Transaction ID:</span>
+            <code id="confTxId" style="font-size: 0.75rem;"></code>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <a id="btnWhatsAppDad" href="#" target="_blank" class="btn btn-success" style="padding: 0.75rem;">
+            <i class="fa-brands fa-whatsapp"></i> Send Location Pin to Dad on WhatsApp
+          </a>
+          <button class="btn btn-outline" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> Print / Save Receipt
+          </button>
+          <button class="btn btn-outline" onclick="closeSuccessModal()">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Track Booking Modal -->
+  <div class="modal-overlay" id="trackModal">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-magnifying-glass"></i> Track Your Booking Status</h3>
+        <button class="modal-close" onclick="closeTrackModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+          <input type="text" id="trackInput" class="form-control" placeholder="Enter Booking ID (e.g. BK-12345) or Phone Number">
+          <button class="btn btn-primary" onclick="trackBooking()"><i class="fa-solid fa-search"></i> Check</button>
+        </div>
+        <div id="trackResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <footer>
+    <p>&copy; 2026 Dad's Bed Measurement & Visit Service • Genuine Customers Only.</p>
+    <p style="margin-top: 0.35rem; font-size: 0.8rem;">
+      Direct Phone for Dad: <strong id="footerDadPhone">+91 9876543210</strong>
+    </p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

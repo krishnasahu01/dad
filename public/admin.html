@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Dad's Bedsheet & Bed Measurement Service</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .admin-nav {
+      background: #0f172a;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 1rem;
+    }
+    .admin-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .admin-tab-btn.active, .admin-tab-btn:hover {
+      background: #1e293b;
+      color: white;
+    }
+    .filter-bar {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .action-icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .action-icon-btn:hover {
+      background: var(--bg-page);
+    }
+    .action-icon-btn.call:hover {
+      background: #eff6ff;
+      color: #2563eb;
+      border-color: #bfdbfe;
+    }
+    .action-icon-btn.wa:hover {
+      background: #ecfdf5;
+      color: #16a34a;
+      border-color: #bbf7d0;
+    }
+    .action-icon-btn.maps:hover {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+    .password-wrapper {
+      position: relative;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Admin Login Screen (Completely Secure - No Hardcoded Credentials) -->
+  <div id="loginScreen" class="modal-overlay active" style="background: #090d16;">
+    <div class="modal-content" style="max-width: 420px; padding: 2.25rem 2rem; border: 1px solid #1e293b; background: #0f172a; color: white;">
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <div style="width: 58px; height: 58px; background: rgba(37, 99, 235, 0.15); color: #3b82f6; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2 style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">Admin Portal Login</h2>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem;">Enter your confidential credentials to manage bookings</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)" autocomplete="off">
+        <div class="form-group" style="margin-bottom: 1.15rem;">
+          <label style="color: #cbd5e1; font-size: 0.85rem; font-weight: 600;">Username</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="Enter username" style="background: #1e293b; border-color: #334155; color: white;" autocomplete="off" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label style="color: #cbd5e1; font-size: 0.85rem; font-weight: 600;">Password</label>
+            <a href="javascript:void(0)" onclick="openRecoveryModal()" style="font-size: 0.75rem; color: #60a5fa; text-decoration: none;">
+              Forgot / Master Key?
+            </a>
+          </div>
+          <div class="password-wrapper">
+            <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" style="background: #1e293b; border-color: #334155; color: white; padding-right: 40px;" autocomplete="off" required>
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btnLoginSubmit" style="width: 100%; padding: 0.85rem; font-size: 1rem; background: #2563eb;">
+          <i class="fa-solid fa-lock"></i> Secure Login
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #1e293b;">
+        <a href="/" style="font-size: 0.8rem; color: #94a3b8; text-decoration: none;">
+          &larr; Back to Customer Website
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Main Interface -->
+  <div id="adminInterface" style="display: none; flex: 1; flex-direction: column;">
+    <!-- Top Bar -->
+    <header class="admin-nav">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-shield-halved" style="color: #3b82f6;"></i> Dad's Admin Portal
+        </div>
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" onclick="switchAdminTab('bookings')">
+            <i class="fa-solid fa-list-check"></i> Bookings & GPS Visits
+          </button>
+          <button class="admin-tab-btn" onclick="switchAdminTab('settings')">
+            <i class="fa-solid fa-gear"></i> Settings & Password
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span id="adminGreeting" style="font-size: 0.85rem; color: #cbd5e1;"></span>
+        <a href="/" target="_blank" class="btn btn-sm btn-outline" style="color: white; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.08);">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Website
+        </a>
+        <button class="btn btn-sm btn-outline" onclick="logoutAdmin()" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); background: transparent;">
+          <i class="fa-solid fa-power-off"></i> Logout
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Admin Workspace -->
+    <main style="max-width: 1300px; margin: 1.5rem auto; padding: 0 1rem; width: 100%;">
+
+      <!-- Security Warning Banner (Shows only if default credentials are detected) -->
+      <div id="securityAlertBanner" style="display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.25rem; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #92400e;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.25rem; color: #d97706;"></i>
+          <div>
+            <strong>Security Notice:</strong> You are currently using the default system password. Please change it immediately so no unauthorized person can access your dashboard.
+          </div>
+        </div>
+        <button class="btn btn-sm" style="background: #d97706; color: white; white-space: nowrap;" onclick="switchAdminTab('settings')">
+          <i class="fa-solid fa-key"></i> Change Password Now
+        </button>
+      </div>
+
+      <!-- TAB 1: BOOKINGS & VISITS -->
+      <section id="tab-bookings">
+        <!-- Metrics Row -->
+        <div class="admin-metrics-grid">
+          <div class="metric-card">
+            <div class="metric-title">Today's Home Visits</div>
+            <div class="metric-value" id="statToday" style="color: var(--primary);">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Pending Visits</div>
+            <div class="metric-value" id="statPending" style="color: var(--warning);">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Completed Visits</div>
+            <div class="metric-value" id="statCompleted" style="color: var(--success);">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Total Verified Bookings</div>
+            <div class="metric-value" id="statTotal">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Advance Fees Collected</div>
+            <div class="metric-value" id="statRevenue" style="color: #059669;">₹0</div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="filter-bar">
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <label style="font-size: 0.85rem; font-weight: 600;">Status:</label>
+              <select id="filterStatus" class="form-control" style="width: auto; padding: 0.4rem 0.6rem;" onchange="loadBookings()">
+                <option value="ALL">All Statuses</option>
+                <option value="CONFIRMED">Confirmed / Upcoming</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <label style="font-size: 0.85rem; font-weight: 600;">Date:</label>
+              <input type="date" id="filterDate" class="form-control" style="width: auto; padding: 0.4rem 0.6rem;" onchange="loadBookings()">
+              <button class="btn btn-outline btn-sm" onclick="clearDateFilter()">All Dates</button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; min-width: 280px;">
+            <input type="text" id="filterSearch" class="form-control" placeholder="Search customer, phone, city..." onkeyup="debounceSearch()">
+            <button class="btn btn-primary btn-sm" onclick="loadBookings()"><i class="fa-solid fa-search"></i></button>
+          </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Visit Date & Slot</th>
+                <th>Customer & Contact</th>
+                <th>Address & GPS Navigation</th>
+                <th>Bed Check Specs</th>
+                <th>Payment Status</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Loading bookings...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: SETTINGS & SECURITY -->
+      <section id="tab-settings" style="display: none; max-width: 760px; margin: 0 auto;">
+        
+        <!-- Security & Admin Credentials Card -->
+        <div class="booking-card" style="padding: 2rem; margin-bottom: 2rem; border-left: 4px solid #2563eb;">
+          <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-user-shield" style="color: #2563eb;"></i> Admin Username & Password Security
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            Change your admin username and password anytime. Only you will know these credentials.
+          </p>
+
+          <form onsubmit="handleCredentialsChange(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Display Name</label>
+                <input type="text" id="secAdminName" class="form-control" placeholder="e.g. Dad's Admin" required>
+              </div>
+              <div class="form-group">
+                <label>Admin Username <span class="required">*</span></label>
+                <input type="text" id="secAdminUsername" class="form-control" placeholder="e.g. mysecretname" required>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Current Password <span class="required">*</span> <small>(Needed to authorize change)</small></label>
+              <div class="password-wrapper">
+                <input type="password" id="secCurrentPassword" class="form-control" placeholder="Enter current password" required style="padding-right: 40px;">
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('secCurrentPassword', this)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>New Password <small>(Leave blank if keeping current)</small></label>
+                <div class="password-wrapper">
+                  <input type="password" id="secNewPassword" class="form-control" placeholder="At least 6 characters" minlength="6" style="padding-right: 40px;">
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('secNewPassword', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <div class="password-wrapper">
+                  <input type="password" id="secConfirmPassword" class="form-control" placeholder="Re-type new password" style="padding-right: 40px;">
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('secConfirmPassword', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+              <i class="fa-solid fa-shield-check"></i> Update Username & Password
+            </button>
+          </form>
+        </div>
+
+        <!-- Business Configurations Card -->
+        <div class="booking-card" style="padding: 2rem;">
+          <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem;">
+            <i class="fa-solid fa-sliders"></i> Business & Visit Settings
+          </h3>
+
+          <form onsubmit="saveSettings(event)">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Business Name</label>
+              <input type="text" id="settingBusinessName" class="form-control" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Dad's Mobile Number (Calls & WhatsApp)</label>
+              <input type="text" id="settingDadPhone" class="form-control" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Advance Visit Fee (₹) <small>(Prevents fake bookings)</small></label>
+              <input type="number" id="settingBookingFee" class="form-control" min="0" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label>Dad's UPI ID (for QR code payment)</label>
+              <input type="text" id="settingUpiId" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-outline">
+              <i class="fa-solid fa-floppy-disk"></i> Save Settings
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Emergency Master Key Password Recovery Modal -->
+  <div class="modal-overlay" id="recoveryModal">
+    <div class="modal-content" style="max-width: 440px; padding: 2rem; background: #0f172a; color: white;">
+      <div class="modal-header" style="border-bottom: 1px solid #1e293b; padding-bottom: 1rem;">
+        <h3 style="color: white;"><i class="fa-solid fa-key" style="color: #3b82f6;"></i> Master Key Password Reset</h3>
+        <button class="modal-close" style="color: #94a3b8;" onclick="closeRecoveryModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem 0 0 0;">
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1.25rem;">
+          If you forgot your password, enter the <strong>Master Security Key</strong> from your server <code>.env</code> file to reset your credentials.
+        </p>
+
+        <form onsubmit="handleRecoveryReset(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="color: #cbd5e1; font-size: 0.85rem;">Master Security Key</label>
+            <input type="password" id="recMasterKey" class="form-control" placeholder="Enter key from .env file" style="background: #1e293b; border-color: #334155; color: white;" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="color: #cbd5e1; font-size: 0.85rem;">New Admin Username</label>
+            <input type="text" id="recNewUsername" class="form-control" placeholder="e.g. dad_admin" style="background: #1e293b; border-color: #334155; color: white;" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="color: #cbd5e1; font-size: 0.85rem;">New Admin Password</label>
+            <input type="password" id="recNewPassword" class="form-control" placeholder="At least 6 characters" minlength="6" style="background: #1e293b; border-color: #334155; color: white;" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; background: #2563eb;">
+            <i class="fa-solid fa-check"></i> Reset Credentials
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dad's Bed Measurement & Visit Notebook Modal -->
+  <div class="modal-overlay" id="notesModal">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <div>
+          <h3><i class="fa-solid fa-book-open"></i> Dad's Bed Measurement Notebook</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Booking: <span id="notesBookingId" style="font-weight: 700; color: var(--primary);"></span></p>
+        </div>
+        <button class="modal-close" onclick="closeNotesModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form onsubmit="saveNotes(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Bed & Mattress Measurements Taken by Dad</label>
+            <textarea id="modalBedMeasurements" class="form-control" rows="3" placeholder="e.g. Bed 1: 72x78 inches, Mattress thickness: 9 inches with pillow top. Bed 2: 36x75, thickness 6 inches."></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Dad's Visit Notes / Fabric Chosen by Customer</label>
+            <textarea id="modalDadNotes" class="form-control" rows="3" placeholder="e.g. Customer selected Glace Cotton Blue Mandala pattern. Requested 2 extra pillow covers with piping."></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Total Bedsheet Order Amount (₹)</label>
+            <input type="number" id="modalOrderAmount" class="form-control" placeholder="e.g. 1800">
+            <small style="color: var(--text-muted); font-size: 0.75rem;">
+              The advance fee of ₹<span id="modalAdvanceFee">99</span> is automatically deducted from this total.
+            </small>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <button type="button" class="btn btn-outline" onclick="closeNotesModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i> Save Details
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
